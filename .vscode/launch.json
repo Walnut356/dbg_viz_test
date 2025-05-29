@@ -1,0 +1,83 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'sample'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=sample",
+                    "--package=sample"
+                ],
+                "filter": {
+                    "name": "sample",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'sample'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=sample",
+                    "--package=sample"
+                ],
+                "filter": {
+                    "name": "sample",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'dbg_viz_test'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=dbg_viz_test",
+                    "--package=dbg_viz_test"
+                ],
+                "filter": {
+                    "name": "dbg_viz_test",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'dbg_viz_test'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=dbg_viz_test",
+                    "--package=dbg_viz_test"
+                ],
+                "filter": {
+                    "name": "dbg_viz_test",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
