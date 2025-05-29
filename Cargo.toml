@@ -1,0 +1,3 @@
+[workspace]
+members = ["sample", "dbg_viz_test"]
+resolver = "3"
