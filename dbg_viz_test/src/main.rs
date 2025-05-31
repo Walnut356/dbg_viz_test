@@ -17,16 +17,80 @@ enum State {
 /// Pairs of values for testing. The first value in the pair is the command to make lldb print the
 /// variable, the second is the output to check against. The output may span multiple lines.
 const CASES: &[&str] = &[
-    r"(unsigned char) u8_v = 0",
-    r"(unsigned short) u16_v = 1",
-    r"(unsigned int) u32_v = 2",
+    "(unsigned char) u8_v = 1",
+    "(unsigned short) u16_v = 2",
+    "(unsigned int) u32_v = 3",
+    "(unsigned long long) u64_v = 4",
+    "(unsigned __int128) u128_v = 5",
+    // assumes 64 bit target
+    "(unsigned long long) usize_v = 6",
+    "(signed char) i8_v = -1",
+    "(short) i16_v = -2",
+    "(int) i32_v = -3",
+    "(long long) i64_v = -4",
+    "(__int128) i128_v = -5",
+    // assumes 64 bit target
+    "(long long) isize_v = -6",
+    "(float) f32_v = 0.5",
+    "(double) f64_v = 1.5",
+    r"(unsigned char[7]) array_v = {
+[0] = 0
+[1] = 1
+[2] = 2
+[3] = 3
+[4] = 255
+[5] = 254
+[6] = 243
+}",
+    r"(int[5]) array2_v = {
+[0] = 1
+[1] = 2
+[2] = 3
+[3] = 2147483647
+[4] = -2147483648
+}",
+    r"(&[u8]) slice_v = [0, 1, 2, 3, 255, 254, 243] {
+[0] = 0
+[1] = 1
+[2] = 2
+[3] = 3
+[4] = 255
+[5] = 254
+[6] = 243
+}",
+r"((u8,f32)) tuple_1 = (1, 20) {
+0 = 1
+1 = 20
+}",
+    // TODO lldb doesn't get the type name properly? Iunno
+    "(sample::Point) point = {
+x = 5.5
+y = 10.25
+}",
+    r"(sample::CEnum) c_enum_1 = Val1",
+    r"(sample::CEnum) c_enum_2 = Val2",
+    r"(sample::CEnum) c_enum_3 = Val3",
+    r"(sample::SumType) sum_1 = Bare",
+    r"(sample::SumType) sum_2 = Tuple(50) {
+0 = 50
+}",
+    r"(sample::SumType) sum_3 = Struct{a = 10, b = -50} {
+a = 10
+b = -50
+}",
 ];
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut cmd = Command::new("lldb");
+    // regular lldb fails to read 128 bit values (just ignores them)
+    // and also fails to acquire type names accurately, so I'm just using codelldb's custom lldb
+    // version since that's the output i want to work properly anyway
+    let mut cmd = Command::new(
+        r"C:\Users\ant_b\.vscode-server\extensions\vadimcn.vscode-lldb-1.11.4\lldb\bin\lldb.exe",
+    );
 
     cmd.arg(r"./target\debug\sample.exe");
+    cmd.env("LLDB_USE_NATIVE_PDB_READER", "0");
 
     // Specify that we want the command's standard output piped back to us.
     // By default, standard input/output/error will be inherited from the
@@ -84,7 +148,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     stdin
                         .write(format!("command source -s true \"{LLDB_COMMANDS}\"\n").as_bytes())
                         .await?;
-                    stdin.write("b main.rs:6\n".as_bytes()).await?;
+                    stdin.write("b main.rs:72\n".as_bytes()).await?;
 
                     state = State::Ready;
                 }
@@ -120,6 +184,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 for e in lines_iter {
                     line.clear();
                     reader.read_line(&mut line).await?;
+                    print!("{line}");
                     assert_eq!(e.trim(), line.trim());
                 }
 
